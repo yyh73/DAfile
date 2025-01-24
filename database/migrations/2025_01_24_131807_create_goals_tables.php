@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('goals', function (Blueprint $table) {
+        Schema::create('goals_tables', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->integer('type');
-            $table->date('due_date');
             $table->timestamps();
         });
     }
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goals');
+        Schema::dropIfExists('goals_tables');
     }
 };
