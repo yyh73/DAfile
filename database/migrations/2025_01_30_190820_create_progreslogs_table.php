@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('posts', function (Blueprint $table) {
-            $table->string('image', 100)->nullable();
+        Schema::create('progreslogs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignID('task_id')->constrained()->onDelete('cascade');
+            $table->date('date');
+            $table->time('start_time');
+            $table->time('finish_time');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('posts', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('progreslogs');
     }
 };
