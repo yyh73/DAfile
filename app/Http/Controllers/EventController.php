@@ -11,7 +11,7 @@ class EventController extends Controller
     public function show(){
         return view("calendars/calendar");
     } 
-    
+
     // 新規予定追加
     public function create(Request $request, Event $event){
         // バリデーション（eventsテーブルの中でNULLを許容していないものをrequired）
@@ -35,8 +35,10 @@ class EventController extends Controller
         return redirect(route("show"));
     }
 
-     // DBから予定取得
-     public function get(Request $request, Event $event){
+
+    // DBから予定取得
+    public function get(Request $request, Event $event);
+  
         // バリデーション
         $request->validate([
             'start_date' => 'required|integer',
@@ -64,7 +66,7 @@ class EventController extends Controller
             ->where('start_date', '<', $end_date) // AND条件
             ->get();
     }
-    
+
     // 予定の更新
     public function update(Request $request, Event $event){
         $input = new Event();
@@ -79,7 +81,17 @@ class EventController extends Controller
         // 更新する予定をDBから探し（find）、内容が変更していたらupdated_timeを変更（fill）して、DBに保存する（save）
         $event->find($request->input('id'))->fill($input->attributesToArray())->save(); // fill()の中身はArray型が必要だが、$inputのままではコレクションが返ってきてしまうため、Array型に変換
 
-        // カレンダー表示画面にリダイレクトする
-        return redirect(route("show"));
+
+    }
+
+    // 予定の削除
+    public function delete(Request $request, Event $event){
+        // 削除する予定をDBから探し（find）、DBから物理削除する（delete）
+        $event->find($request->input('id'))->delete();
+
+         // カレンダー表示画面にリダイレクトする
+         return redirect(route("show"));
+        }
     }
 }
+
