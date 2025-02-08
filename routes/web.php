@@ -29,8 +29,10 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     //プロフィール管理
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destr);
 
     //カレンダー管理
     Route::get('/calendar', [EventController::class, 'show'])->name("show");
@@ -42,6 +44,7 @@ Route::middleware('auth')->group(function () {
     //タスク管理
     Route::resource('tasks', TaskController::class);
     Route::patch('/tasks/{task}/toggle', [TaskController::class, 'toggleFinished'])->name('tasks.toggleFinished'); //タスク状態切り替え
+
 
 });
 

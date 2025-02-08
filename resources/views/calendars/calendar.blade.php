@@ -8,11 +8,13 @@
         <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js']) <!-- vite用の記述忘れずに -->
     </head>
+    
     <body>
         <!-- 以下のdivタグ内にカレンダーを表示 -->
         <div id='calendar'></div>
                  <!-- カレンダー新規追加モーダル -->
                  <div id="modal-add" class="modal">
+
          <div class="modal-contents">
                 <form method="POST" action="{{ route('create') }}">
                     @csrf
@@ -66,7 +68,7 @@
 
                     <button type="submit">決定</button>
                 </form>
-
+                
                 <form id="delete-form" method="post" action="{{ route('delete') }}">
                     @csrf
                     @method('DELETE')
@@ -76,6 +78,7 @@
                 
             </div>
         </div>
+   
     </body>
 </html>
 

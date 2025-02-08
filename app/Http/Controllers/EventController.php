@@ -35,8 +35,10 @@ class EventController extends Controller
         return redirect(route("show"));
     }
 
+
     // DBから予定取得
-    public function get(Request $request, Event $event){
+    public function get(Request $request, Event $event);
+  
         // バリデーション
         $request->validate([
             'start_date' => 'required|integer',
@@ -65,7 +67,6 @@ class EventController extends Controller
             ->get();
     }
 
-    //（ここから）追記
     // 予定の更新
     public function update(Request $request, Event $event){
         $input = new Event();
@@ -80,6 +81,7 @@ class EventController extends Controller
         // 更新する予定をDBから探し（find）、内容が変更していたらupdated_timeを変更（fill）して、DBに保存する（save）
         $event->find($request->input('id'))->fill($input->attributesToArray())->save(); // fill()の中身はArray型が必要だが、$inputのままではコレクションが返ってきてしまうため、Array型に変換
 
+
     }
 
     // 予定の削除
@@ -91,3 +93,5 @@ class EventController extends Controller
          return redirect(route("show"));
         }
     }
+}
+

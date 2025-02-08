@@ -15,11 +15,8 @@ function formatDate(date, pos) {
     return dt.getFullYear() + '-' +('0' + (dt.getMonth()+1)).slice(-2)+ '-' +  ('0' + dt.getDate()).slice(-2);
 }
 
-// カレンダーを表示させたいタグのidを取得
 const calendarEl = document.getElementById("calendar");
 
-// new Calender(カレンダーを表示させたいタグのid, {各種カレンダーの設定});
-// "calendar"というidがないbladeファイルではエラーが出てしまうので、if文で除外。
 if (calendarEl) {
     const calendar = new Calendar(calendarEl, {
         // プラグインの導入(import忘れずに)
@@ -39,8 +36,8 @@ if (calendarEl) {
             center: "title",
             end: "eventAddButton dayGridMonth,timeGridWeek", // 追記2（半角スペースは必要）
         },
-        height: "auto", // 高さをウィンドウサイズに揃える
-
+        height: "auto", // 高さをウィンドウサイト
+      
         // カレンダーで日程を指定して新規予定追加
     selectable: true, // 日程の選択を可能にする
     select: function (info) { // 日程を選択した後に行う処理を記述
@@ -58,6 +55,9 @@ if (calendarEl) {
 
          // DBに登録した予定を表示する
     events: function (info, successCallback, failureCallback) { // eventsはページが切り替わるたびに実行される
+
+     // DBに登録した予定を表示する
+     events: function (info, successCallback, failureCallback) { // eventsはページが切り替
         // axiosでLaravelの予定取得処理を呼び出す
         axios
             .post("/calendar/get", {
