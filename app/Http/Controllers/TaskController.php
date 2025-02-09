@@ -7,66 +7,93 @@ use App\Models\Task;
 
 class TaskController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    //タスク一覧表示
     public function index()
     {
-        //タスク一覧表示
-        $task = Task::orderBy('created_at','desc')->get();
-        return view('tasks.index');
+        //一覧取得で作成日時の降順
+        $tasks = Task::orderBy('created_at','desc')->get();
+        return view('tasks.index', compact('tasks'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
+    //タスク作成フォーム
     public function create()
     {
-        //タスク作成フォーム
         return view('tasks.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    //タスク保存
     public function store(Request $request)
     {
-        //タスク保存
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'priority' => 'required|integer|min:1|max:5',
+            'due_date' => 'nullable|date',
+        ]);
+
+         // タスク作成
+         Task::create([
+            'user_id' => auth()->id(),
+            'title' => $request->title,
+            'description' => $request->description,
+            'priority' => $request->priority,
+            'finished_status' => 0, // デフォルト未完了
+            'due_date' => $request->due_date,
+        ]);
+        
+        return redirect()->route('tasks.index')->with('success', 'タスクを作成しました');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    //タスクの詳細表示
     public function show(string $id)
     {
-        //
+        $task = Task::findOrFail($id);
+        return view('tasks.show', compact('task'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // タスク編集フォームを表示
     public function edit(string $id)
     {
-        //タスク編集フォーム
-        $task = Task::find($task_id);
-        return view('task.edit');
+        $task = Task::findOrFail($id);
+        return view('tasks.edit', compact('task'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    //タスク更新
     public function update(Request $request, string $id)
     {
-        //タスク更新
-    }
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'priority' => 'required|integer|min:1|max:5',
+            'finished_status' => 'required|integer|in:0,1',
+            'due_date' => 'nullable|date',
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
+        // 指定したタスクを取得
+        $task = Task::findOrFail($id);
+
+        
+
+        // データ更新
+        $task->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'priority' => $request->priority,
+            'finished_status' => $request->finished_status,
+            'due_date' => $request->due_date,
+        ]);
+
+        return redirect()->route('tasks.index')->with('success', 'タスクを更新しました');
+    }
+    
+
+    //タスク削除
     public function destroy(string $id)
     {
         //タスク削除
+        $task = Task::findOrFail($id);
         $task->delete();
-        redirect()->route('tasks.index')->with('success', 'タスクを削除しました');
+        return redirect()->route('tasks.index')->with('success', 'タスクを削除しました');
     }
 }

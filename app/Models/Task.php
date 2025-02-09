@@ -26,9 +26,9 @@ class Task extends Model //TaskモデルはModelを継承
     }
 
     //未完了、完了の文字取得
-    public function getFinishedStatusAttribute(): string
-    {
-        return $this->finished_status == 1 ? '完了' : '未完了';
-    }
+    //public function getFinishedStatusAttribute(): string
+    //{
+       // return $this->attributes['finished_status'] == 1 ? '完了' : '未完了';
+    //}
 
 }
