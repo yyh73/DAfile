@@ -37,7 +37,7 @@ class EventController extends Controller
 
 
     // DBから予定取得
-    public function get(Request $request, Event $event);
+    public function get(Request $request, Event $event){
   
         // バリデーション
         $request->validate([
@@ -93,5 +93,5 @@ class EventController extends Controller
          return redirect(route("show"));
         }
     }
-}
+
 

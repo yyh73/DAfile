@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destr);
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     //カレンダー管理
     Route::get('/calendar', [EventController::class, 'show'])->name("show");
