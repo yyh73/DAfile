@@ -22,26 +22,31 @@ if (calendarEl) {
         // プラグインの導入(import忘れずに)
         plugins: [interactionPlugin,dayGridPlugin, timeGridPlugin],
     
-        // カレンダー表示
+        // 最初の「月」カレンダー表示
         initialView: "dayGridMonth", // 最初に表示させるページの形式
-        headerToolbar: { // ヘッダーの設定
-            // コンマのみで区切るとページ表示時に間が空かず、半角スペースで区切ると間が空く（半角があるかないかで表示が変わることに注意）
-            start: "prev,next today", // ヘッダー左（前月、次月、今日の順番で左から配置）
-            center: "title", // ヘッダー中央（今表示している月、年）
-            end: "dayGridMonth,timeGridWeek", // ヘッダー右（月形式、時間形式）
-        },
+
+        height: "auto", 
         
         headerToolbar: {
             start: "prev,next today",
             center: "title",
-            end: "eventAddButton dayGridMonth,timeGridWeek", // 追記2（半角スペースは必要）
+            end: "eventAddButton dayGridMonth,timeGridWeek,timeGridDay", // 週・日表示は分単位
         },
-        height: "auto", // 高さをウィンドウサイト
+       
+
+        slotDuration: '00:10:00',
+        slotLabelInterval: '00:10:00',
+        minTime: "00:00:00",
+        maxTime: "24:00:00",
+        nowIndicator: true, 
+        allDaySlot: false,
       
         // カレンダーで日程を指定して新規予定追加
     selectable: true, // 日程の選択を可能にする
-    select: function (info) { // 日程を選択した後に行う処理を記述
+    select: function (info) { 
+        // 日程を選択した後に行う処理を記述
         // 選択した日程を反映（のこりは初期化）
+
         document.getElementById("new-id").value = "";
         document.getElementById("new-event_title").value = "";
         document.getElementById("new-start_date").value = formatDate(info.start); // 選択した開始日を反映
@@ -55,13 +60,8 @@ if (calendarEl) {
 
          // DBに登録した予定を表示する
     events: function (info, successCallback, failureCallback) { // eventsはページが切り替わるたびに実行される
-
-     // DBに登録した予定を表示する
-     events: function (info, successCallback, failureCallback) { // eventsはページが切り替
-        // axiosでLaravelの予定取得処理を呼び出す
-        axios
-            .post("/calendar/get", {
-                // 現在カレンダーが表示している日付の期間(1月ならば、start_date=1月1日、end_date=1月31日となる)
+        axios.post("/calendar/get", {
+        // 現在カレンダーが表示している日付の期間(1月ならば、start_date=1月1日、end_date=1月31日となる)
                 start_date: info.start.valueOf(),
                 end_date: info.end.valueOf(),
             })
