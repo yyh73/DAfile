@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class EventController extends Controller
 {
@@ -25,8 +27,8 @@ class EventController extends Controller
         // 登録処理
         $event->event_title = $request->input('event_title');
         $event->event_body = $request->input('event_body');
-        $event->start_date = $request->input('start_date');
-        $event->end_date = date("Y-m-d", strtotime("{$request->input('end_date')} +1 day")); // FullCalendarが登録する終了日は仕様で1日ずれるので、その修正を行っている
+        $event->start_date = Carbon::parse ($request->input('start_date'))->format('Y-m-d H:i:s');
+        $event->end_date =  Carbon::parse(date("Y-m-d", strtotime("{$request->input('end_date')} +1 day"))); // FullCalendarが登録する終了日は仕様で1日ずれるので、その修正を行っている
         $event->event_color = $request->input('event_color');
         $event->event_border_color = $request->input('event_color');
         $event->save();
@@ -41,8 +43,8 @@ class EventController extends Controller
   
         // バリデーション
         $request->validate([
-            'start_date' => 'required|integer',
-            'end_date' => 'required|integer'
+            'start_date' => 'required|date_format:Y-m-d\TH:i',
+            'end_date' => 'required|date_format:Y-m-d\TH:i|after:start_date',
         ]);
 
         // 現在カレンダーが表示している日付の期間

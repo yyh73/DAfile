@@ -9,11 +9,22 @@ import interactionPlugin from '@fullcalendar/interaction';
 // 日付を-1してYYYY-MM-DDの書式で返すメソッド
 function formatDate(date, pos) {
     const dt = new Date(date);
+
     if(pos==="end"){
         dt.setDate(dt.getDate() - 1);
     }
-    return dt.getFullYear() + '-' +('0' + (dt.getMonth()+1)).slice(-2)+ '-' +  ('0' + dt.getDate()).slice(-2);
+    const year = dt.getFullYear();
+    const month = ('0' + (dt.getMonth() + 1)).slice(-2);
+    const day = ('0' + dt.getDate()).slice(-2);
+    const hours = ('0' + dt.getHours()).slice(-2);
+    const minutes = ('0' + dt.getMinutes()).slice(-2);
+    const seconds = ('0' + dt.getSeconds()).slice(-2); // MySQL の `DATETIME` は秒まで含む
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+console.log(formatDate("2025-02-12T21:09", "start")); // 2025-02-12 21:09:00
+console.log(formatDate("2025-02-12T21:09", "end"));   // 2025-02-11 21:09:00
 
 const calendarEl = document.getElementById("calendar");
 
@@ -24,8 +35,6 @@ if (calendarEl) {
     
         // 最初の「月」カレンダー表示
         initialView: "dayGridMonth", // 最初に表示させるページの形式
-
-        height: "auto", 
         
         headerToolbar: {
             start: "prev,next today",
@@ -33,9 +42,23 @@ if (calendarEl) {
             end: "eventAddButton dayGridMonth,timeGridWeek,timeGridDay", // 週・日表示は分単位
         },
        
+        height: "auto", 
 
-        slotDuration: '00:10:00',
-        slotLabelInterval: '00:10:00',
+        views: {
+            dayGridMonth: {
+                slotDuration: "00:01:00", // 月カレンダーでの入力を1分単位にする
+            },
+            timeGridWeek: {
+                slotDuration: "00:10:00", // 週カレンダーでは10分単位
+                slotLabelInterval: "00:10:00",
+            },
+            timeGridDay: {
+                slotDuration: "00:10:00", // 日カレンダーでは10分単位
+                slotLabelInterval: "00:10:00",
+            }
+        },
+       
+
         minTime: "00:00:00",
         maxTime: "24:00:00",
         nowIndicator: true, 
