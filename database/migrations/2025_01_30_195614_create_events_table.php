@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('event_color');
             $table->string('event_border_color');
             $table->dateTime('reminder_time')->nullable();//リマインダー
+
             $table->timestamps();
         });
 

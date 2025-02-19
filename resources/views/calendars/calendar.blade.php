@@ -15,7 +15,7 @@
                  <!-- カレンダー新規追加モーダル -->
                  <div id="modal-add" class="modal">
 
-         <div class="modal-contents">
+                <div class="modal-contents">
                 <form method="POST" action="{{ route('create') }}">
                     @csrf
                     <input id="new-id" type="hidden" name="id" value="" />
@@ -34,8 +34,28 @@
                     <select id="new-event_color" name="event_color">
                         <option value="blue" selected>青</option>
                         <option value="green">緑</option>
+                        <option value="pink">ピンク</option>
+                        <option value="red">赤</option>
+                        <option value="yellow">黄色</option>
+                        <option value="orange">オレンジ</option>
+                        <option value="purple">紫</option>
+                        <option value="yellowgreen">黄緑</option>
+                        <option value="lightblue">水色</option>
+                        <option value="gray">グレー</option>
                     </select>
+
+                    <label>
+                      <input type="checkbox" name="show_in_month" value="1"> 月に表示する
+                    </label>
+                    <label>
+                      <input type="checkbox" name="show_in_week" value="1"> 週に表示する
+                    </label>
+                    <label>
+                      <input type="checkbox" name="show_in_day" value="1"> 日に表示する
+                    </label>
+                    
                     <button type="button" onclick="closeAddModal()">キャンセル</button>
+                    
                     <button type="submit">決定</button>
                 </form>
             </div>
@@ -48,25 +68,42 @@
                     @csrf
                     @method('PUT')
                     <input type="hidden" id="id" name="id" value="" />
+
                     <label for="event_title">タイトル</label>
-
                     <input class="input-title" type="text" id="event_title" name="event_title" value="" />
+
                     <label for="start_date">開始日時</label>
-
-                    <input class="input-date" type="date" id="start_date" name="start_date" value="" />
+                    <input class="input-date" type="datetime-local" id="start_date" name="start_date" value="" />
                     <label for="end_date">終了日時</label>
+                    <input class="input-date" type="datetime-local" id="end_date" name="end_date" value="" />
 
-                    <input class="input-date" type="date" id="end_date" name="end_date" value="" />
                     <label for="event_body" style="display: block">内容</label>
-
                     <textarea id="event_body" name="event_body" rows="3" value=""></textarea>
                     <label for="event_color">背景色</label>
 
                     <select id="event_color" name="event_color">
                         <option value="blue">青</option>
                         <option value="green">緑</option>
+                        <option value="pink">ピンク</option>
+                        <option value="red">赤</option>
+                        <option value="yellow">黄色</option>
+                        <option value="orange">オレンジ</option>
+                        <option value="purple">紫</option>
+                        <option value="yellowgreen">黄緑</option>
+                        <option value="lightblue">水色</option>
+                        <option value="gray">グレー</option>
                     </select>
 
+                    <label>
+                      <input type="checkbox" name="show_in_month" value="1"> 月に表示する
+                    </label>
+                    <label>
+                      <input type="checkbox" name="show_in_week" value="1"> 週に表示する
+                    </label>
+                    <label>
+                      <input type="checkbox" name="show_in_day" value="1"> 日に表示する
+                    </label>
+                
                     <button type="button" onclick="closeUpdateModal()">キャンセル</button>
 
                     <button type="submit">決定</button>
