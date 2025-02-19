@@ -16,21 +16,35 @@ class EventController extends Controller
 
     // 新規予定追加
     public function create(Request $request, Event $event){
+        dd($request->all()); // ここでリクエストデータを確認
+
         // バリデーション（eventsテーブルの中でNULLを許容していないものをrequired）
         $request->validate([
             'event_title' => 'required',
-            'start_date' => 'required',
-            'end_date' => 'required',
+            'start_date' => 'required|date_format:Y-m-d\TH:i',
+            'end_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:start_date',
             'event_color' => 'required',
         ]);
+
+        // フロントエンドから受け取った値を取得（nullの場合はデフォルト値を設定）
+        $showInMonth = $request->input('show_in_month', false); 
+        $showInWeek = $request->input('show_in_week', true); 
+        $showInDay = $request->input('show_in_day', true);
+        
 
         // 登録処理
         $event->event_title = $request->input('event_title');
         $event->event_body = $request->input('event_body');
-        $event->start_date = Carbon::parse ($request->input('start_date'))->format('Y-m-d H:i:s');
-        $event->end_date =  Carbon::parse(date("Y-m-d", strtotime("{$request->input('end_date')} +1 day"))); // FullCalendarが登録する終了日は仕様で1日ずれるので、その修正を行っている
+        $event->start_date = Carbon::createFromFormat('Y-m-d\TH:i', $request->input('start_date'))->format('Y-m-d H:i:s');
+        $event->end_date = Carbon::createFromFormat('Y-m-d\TH:i', $request->input('end_date'))->addDay()->format('Y-m-d H:i:s'); // FullCalendarが登録する終了日は仕様で1日ずれるので、その修正を行っている
         $event->event_color = $request->input('event_color');
         $event->event_border_color = $request->input('event_color');
+
+         // フィルタリング用カラムを保存
+        $event->show_in_month = $showInMonth;
+        $event->show_in_week = $showInWeek;
+        $event->show_in_day = $showInDay;
+
         $event->save();
 
         // カレンダー表示画面にリダイレクトする
@@ -40,49 +54,89 @@ class EventController extends Controller
 
     // DBから予定取得
     public function get(Request $request, Event $event){
-  
-        // バリデーション
-        $request->validate([
-            'start_date' => 'required|date_format:Y-m-d\TH:i',
-            'end_date' => 'required|date_format:Y-m-d\TH:i|after:start_date',
-        ]);
 
-        // 現在カレンダーが表示している日付の期間
-        $start_date = date('Y-m-d', $request->input('start_date') / 1000); // 日付変換（JSのタイムスタンプはミリ秒なので秒に変換）
-        $end_date = date('Y-m-d', $request->input('end_date') / 1000);
+        \Log::info('リクエストデータ: ', $request->all());
 
-        // 予定取得処理（これがaxiosのresponse.dataに入る）
-        return $event->query()
-            // DBから取得する際にFullCalendarの形式にカラム名を変更する
-            ->select(
-                'id',
-                'event_title as title',
-                'event_body as description',
-                'start_date as start',
-                'end_date as end',
-                'event_color as backgroundColor',
-                'event_border_color as borderColor'
-            )
-            // 表示されているカレンダーのeventのみをDBから検索して表示
-            ->where('end_date', '>', $start_date)
-            ->where('start_date', '<', $end_date) // AND条件
-            ->get();
+
+       // バリデーション
+    $request->validate([
+        'start_date' => 'required|date_format:Y-m-d',
+        'end_date' => 'required|date_format:Y-m-d|after:start_date',
+    ]);
+
+    \Log::info('バリデーション通過');
+
+    // 現在カレンダーが表示している日付の期間
+    $start_date = $request->input('start_date');// 日付変換
+    $end_date = $request->input('end_date');
+    $view = $request->input('view'); // "month", "week", "day" のどれか
+
+    \Log::info("取得する範囲: {$start_date} ~ {$end_date}");
+
+    // 予定取得処理（これがaxiosのresponse.dataに入る）
+    $query = $event->query()
+        // DBから取得する際にFullCalendarの形式にカラム名を変更する
+        ->select(
+            'id',
+            'event_title as title',
+            'event_body as description',
+            \DB::raw("DATE_FORMAT(start_date, '%Y-%m-%d %H:%i') as start"),
+            \DB::raw("DATE_FORMAT(end_date, '%Y-%m-%d %H:%i') as end"),
+            'event_color as backgroundColor',
+            'event_border_color as borderColor',
+            'show_in_month',
+            'show_in_week',
+            'show_in_day'
+        )
+
+        ->where('end_date', '>=', $start_date)
+        ->where('start_date', '<=', $end_date);
+        
+
+        if ($view === 'dayGridMonth') {
+            $query->where('show_in_month', 1);
+        } elseif ($view === 'timeGridWeek') {
+            $query->where('show_in_week', 1);
+        } elseif ($view === 'timeGridDay') {
+            $query->where('show_in_day', 1);
+        }
+
+        $events = $query->get();
+
+        // デバッグ: 取得したデータを確認
+        \Log::info("取得したイベントデータ: " . json_encode($events->toArray()));
+
+        return response()->json($events);
     }
 
     // 予定の更新
     public function update(Request $request, Event $event){
-        $input = new Event();
+        // 予定を取得
+        $event = $event->find($request->input('id'));
 
-        $input->event_title = $request->input('event_title');
-        $input->event_body = $request->input('event_body');
-        $input->start_date = $request->input('start_date');
-        $input->end_date = date("Y-m-d", strtotime("{$request->input('end_date')} +1 day"));
-        $input->event_color = $request->input('event_color');
-        $input->event_border_color = $request->input('event_color');
+        // 予定が見つからない場合はエラーレスポンスを返す
+        if (!$event) {
+            return response()->json(['error' => 'イベントが見つかりません'], 404);
+        }
 
-        // 更新する予定をDBから探し（find）、内容が変更していたらupdated_timeを変更（fill）して、DBに保存する（save）
-        $event->find($request->input('id'))->fill($input->attributesToArray())->save(); // fill()の中身はArray型が必要だが、$inputのままではコレクションが返ってきてしまうため、Array型に変換
+        // データを更新
+        $event->event_title = $request->input('event_title');
+        $event->event_body = $request->input('event_body');
+        $event->start_date = $request->input('start_date');
+        $event->end_date = $request->input('end_date');
+        $event->event_color = $request->input('event_color');
+        $event->event_border_color = $request->input('event_color');
 
+         // 表示設定のチェックボックスを反映
+        $event->show_in_month = $request->input('show_in_month', 1);
+        $event->show_in_week = $request->input('show_in_week', 1);
+        $event->show_in_day = $request->input('show_in_day', 1);
+
+        // 保存
+        $event->save();
+
+        // カレンダー画面にリダイレクト
+        return redirect()->route("show");
 
     }
 
@@ -95,5 +149,3 @@ class EventController extends Controller
          return redirect(route("show"));
         }
     }
-
-
