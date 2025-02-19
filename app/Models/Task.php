@@ -10,6 +10,11 @@ class Task extends Model //TaskモデルはModelを継承
 {
     use HasFactory; //ファクトリー機能
 
+    public function goals(){
+        //1つの科目を多数の生徒が履修。
+        return $this->belongsToMany(Goal::class);
+    }
+
     protected $fillable = [
         'user_id',
         'title',
