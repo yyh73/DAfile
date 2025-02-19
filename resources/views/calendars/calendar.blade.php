@@ -55,11 +55,12 @@
                     </label>
                     
                     <button type="button" onclick="closeAddModal()">キャンセル</button>
-                    
+
                     <button type="submit">決定</button>
                 </form>
             </div>
         </div>
+        
 
          <!-- カレンダー編集モーダル -->
         <div id="modal-update" class="modal">
