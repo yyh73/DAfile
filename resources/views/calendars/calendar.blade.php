@@ -29,7 +29,9 @@
                     <input id="new-end_date" class="input-date" type="datetime-local" name="end_date" value="" step="60" /> 
 
                     <label for="event_body" style="display: block">内容</label>
-                    <textarea id="new-event_body" name="event_body" rows="3" value=""></textarea>
+                    <textarea id="new-event_body" name="event_body" rows="3"></textarea>
+                
+                <div class="event-options">
                     <label for="event_color">背景色</label>
                     <select id="new-event_color" name="event_color">
                         <option value="blue" selected>青</option>
@@ -44,6 +46,10 @@
                         <option value="gray">グレー</option>
                     </select>
 
+                    <label for="reminder_time">リマインド時間（分前）</label>
+                    <input id="reminder_time" type="number" name="reminder_time" min="1" step="1" value="15">
+                </div>
+
                     <label>
                       <input type="checkbox" name="show_in_month" value="1"> 月に表示する
                     </label>
@@ -56,7 +62,7 @@
                     
                     <button type="button" onclick="closeAddModal()">キャンセル</button>
                     
-                    <button type="submit">決定</button>
+                    <button id="save-event-button" type="button">決定</button>
                 </form>
             </div>
         </div>
@@ -64,7 +70,7 @@
          <!-- カレンダー編集モーダル -->
         <div id="modal-update" class="modal">
             <div class="modal-contents">
-                <form method="POST" action="{{ route('update') }}" >
+                <form id="update-form" method="POST" action="{{ route('update') }}" >
                     @csrf
                     @method('PUT')
                     <input type="hidden" id="id" name="id" value="" />
@@ -78,7 +84,8 @@
                     <input class="input-date" type="datetime-local" id="end_date" name="end_date" value="" />
 
                     <label for="event_body" style="display: block">内容</label>
-                    <textarea id="event_body" name="event_body" rows="3" value=""></textarea>
+                    <textarea id="event_body" name="event_body" rows="3"></textarea>
+                <div class="event-options">
                     <label for="event_color">背景色</label>
 
                     <select id="event_color" name="event_color">
@@ -94,6 +101,10 @@
                         <option value="gray">グレー</option>
                     </select>
 
+                    <label for="reminder_time">リマインド時間（分前）</label>
+                    <input id="reminder_time" type="number" name="reminder_time" min="1" step="1" value="15">
+                </div>
+
                     <label>
                       <input type="checkbox" name="show_in_month" value="1"> 月に表示する
                     </label>
@@ -106,7 +117,7 @@
                 
                     <button type="button" onclick="closeUpdateModal()">キャンセル</button>
 
-                    <button type="submit">決定</button>
+                    <button id="save-event-button" type="button">決定</button>
                 </form>
                 
                 <form id="delete-form" method="post" action="{{ route('delete') }}">
@@ -179,6 +190,17 @@ textarea{
     border: 1px solid black;
     border-radius: 5px;
     resize: none;
+}
+.event-options {
+    display: flex;
+    align-items: center;  /*ラベルと入力欄の高さを揃える */
+    gap: 15px;  /* 要素の間隔を適切に調整 */
+}
+
+/*  背景色の `select` とリマインド時間の `input` の幅を調整 */
+.event-options select,
+.event-options input {
+    width: 130px;  /* 必要に応じて幅を調整 */
 }
 
 select{

@@ -10,14 +10,15 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
+    {   
         Schema::create('reminders', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('task_id')->constrained()->onDelete('cascade');
-            $table->dateTime('reminder_time');
+            $table->foreignId('task_id')->constrained('tasks')->nullable()->onDelete('cascade');
+            $table->foreignId('event_id')->constrained()->nullable()->onDelete('cascade'); // イベント用
+            $table->integer('reminder_time');
             $table->timestamps();
-        });
-    }
+    });
+}
 
     /**
      * Reverse the migrations.

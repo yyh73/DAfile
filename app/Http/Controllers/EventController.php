@@ -16,7 +16,7 @@ class EventController extends Controller
 
     // 新規予定追加
     public function create(Request $request, Event $event){
-        dd($request->all()); // ここでリクエストデータを確認
+        \Log::info('受け取ったリクエストデータ:', $request->all());
 
         // バリデーション（eventsテーブルの中でNULLを許容していないものをrequired）
         $request->validate([
@@ -24,15 +24,33 @@ class EventController extends Controller
             'start_date' => 'required|date_format:Y-m-d\TH:i',
             'end_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:start_date',
             'event_color' => 'required',
+            'reminder_time' => 'nullable|integer|min:1',
         ]);
+        
+        \Log::info('バリデーション通過');
+
+        try {
+            // start_date と end_date のフォーマットを確認
+            $startDate = Carbon::createFromFormat('Y-m-d\TH:i', $request->input('start_date'))->format('Y-m-d H:i:s');
+            $endDate = Carbon::createFromFormat('Y-m-d\TH:i', $request->input('end_date'))->addDay()->format('Y-m-d H:i:s');
+    
+            \Log::info("変換後の start_date: {$startDate}, end_date: {$endDate}");
 
         // フロントエンドから受け取った値を取得（nullの場合はデフォルト値を設定）
         $showInMonth = $request->input('show_in_month', false); 
         $showInWeek = $request->input('show_in_week', true); 
         $showInDay = $request->input('show_in_day', true);
-        
 
-        // 登録処理
+        $reminderMinutes = $request->input('reminder_time', null);
+        $reminderTime = null; 
+
+        if ($reminderMinutes !== null) {
+            $reminderTime = Carbon::parse($startDate)->subMinutes($reminderMinutes)->format('Y-m-d H:i:s');
+        }
+
+        \Log::info("リマインダー時間: " . ($reminderTime ?? 'なし'));
+
+        // イベント登録処理
         $event->event_title = $request->input('event_title');
         $event->event_body = $request->input('event_body');
         $event->start_date = Carbon::createFromFormat('Y-m-d\TH:i', $request->input('start_date'))->format('Y-m-d H:i:s');
@@ -45,7 +63,14 @@ class EventController extends Controller
         $event->show_in_week = $showInWeek;
         $event->show_in_day = $showInDay;
 
+        $event->reminder_time = $reminderTime;
+
         $event->save();
+
+        \Log::info('イベント保存完了');
+    } catch (\Exception $e) {
+        \Log::error('イベント保存エラー: ' . $e->getMessage());
+    }
 
         // カレンダー表示画面にリダイレクトする
         return redirect(route("show"));
