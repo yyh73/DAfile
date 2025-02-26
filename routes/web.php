@@ -39,7 +39,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/calendar/create', [EventController::class, 'create'])->name("create"); // 予定の新規追加
     Route::put('/calendar/update', [EventController::class, 'update'])->name("update"); // 予定の更新
     Route::post('/calendar/get',  [EventController::class, 'get'])->name("get"); // DBに登録した予定を取得
-    Route::match(['get', 'post'], '/calendar/get', [EventController::class, 'get'])->name("get");
     Route::delete('/calendar/delete', [EventController::class, 'delete'])->name("delete"); // 予定の削除
 
     //タスク管理

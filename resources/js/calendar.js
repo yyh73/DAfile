@@ -20,18 +20,15 @@ function formatDateForInput(date) {
 
 // ページ読み込み時の処理
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("ページの読み込みが完了しました！");
+    const saveButton = document.getElementById("save-new-event-button");
     
-    const saveButton = document.getElementById("save-event-button");
-    console.log("🎯 save-event-button:", saveButton); // ← ここでボタンが取得できているか確認
 
     if (saveButton) {
     saveButton.addEventListener("click", function (){
-        console.log("📤 クリックされた！");
+        
     });
 }
-    console.log("カレンダー要素が見つかりました！");
-
+    
     function scheduleReminder(event) {
         if (!event.reminder_time || Notification.permission !== "granted") {
             return;
@@ -133,12 +130,20 @@ document.addEventListener("DOMContentLoaded", function () {
         selectable: true,
 
         events: function (info, successCallback, failureCallback) {
+            console.log("📤 予定を取得するリクエストを送信:", {
+                start_date: info.start.toISOString().split("T")[0],
+                end_date: info.end.toISOString().split("T")[0],
+                view: currentView,
+            });
+
             axios.post("/calendar/get", {
                 start_date: info.start.toISOString().split("T")[0],
                 end_date: info.end.toISOString().split("T")[0],
                 view: currentView,
             })
             .then((response) => {
+                console.log("📥 サーバーから受け取ったデータ:", response.data);
+
                 if (!Array.isArray(response.data)) {
                     console.error("データの形式が正しくありません:", response.data);
                     alert("イベントデータの形式が正しくありません。");
@@ -159,7 +164,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     scheduleReminder(eventData);
                     return eventData;
                 });
+                console.log("✅ フォーマット後の予定データ:", formattedEvents);
                 successCallback(formattedEvents);
+                
             })
             .catch((error) => {
                 console.error("イベントの取得に失敗:", error);
@@ -169,12 +176,12 @@ document.addEventListener("DOMContentLoaded", function () {
         },
 
         select: function (info) {
-            document.getElementById("new-id").value = "";
-            document.getElementById("new-event_title").value = "";
-            document.getElementById("new-start_date").value = formatDate(info.start, "start");
-            document.getElementById("new-end_date").value = formatDate(info.end, "end");
-            document.getElementById("new-event_body").value = "";
-            document.getElementById("new-event_color").value = "blue";
+            document.getElementById("id").value = "";
+            document.getElementById("event_title").value = "";
+            document.getElementById("start_date").value = formatDate(info.start, "start");
+            document.getElementById("end_date").value = formatDate(info.end, "end");
+            document.getElementById("event_body").value = "";
+            document.getElementById("event_color").value = "blue";
             document.getElementById('modal-add').style.display = 'flex';
     },
 
@@ -194,12 +201,12 @@ document.addEventListener("DOMContentLoaded", function () {
             eventAddButton: { 
                 text: "予定を追加",
                 click: function () {
-                    document.getElementById("new-id").value = "";
-                    document.getElementById("new-event_title").value = "";
-                    document.getElementById("new-start_date").value = "";
-                    document.getElementById("new-end_date").value = "";
-                    document.getElementById("new-event_body").value = "";
-                    document.getElementById("new-event_color").value = "blue";
+                    document.getElementById("id").value = "";
+                    document.getElementById("event_title").value = "";
+                    document.getElementById("start_date").value = "";
+                    document.getElementById("end_date").value = "";
+                    document.getElementById("event_body").value = "";
+                    document.getElementById("event_color").value = "blue";
                     document.getElementById("modal-add").style.display = "flex";
                 }
             }
@@ -208,20 +215,24 @@ document.addEventListener("DOMContentLoaded", function () {
     
     calendar.render();
 
-    document.getElementById("save-event-button").addEventListener("click", function () {
+    document.getElementById("save-new-event-button").addEventListener("click", function (event) {event.preventDefault();
+        const eventTitle = document.getElementById("new-event_title").value;
+        const startDate = document.getElementById("new-start_date").value;
+        const endDate = document.getElementById("new-end_date").value;
+        const eventBody = document.getElementById("new-event_body").value;
+        const eventColor = document.getElementById("new-event_color").value;
         const reminderTime = document.getElementById("reminder_time")?.value || null; // リマインダー時間を取得
         console.log("送信するリマインダー時間:", reminderTime); // 送信データの確認用
 
         console.log("📤 リクエストを送信するよ！");
-    
         axios.post("/calendar/create", {
-
-            title: document.getElementById("new-event_title").value,
-            start: document.getElementById("new-start_date").value,
-            end: document.getElementById("new-end_date").value,
-            event_body: document.getElementById("new-event_body").value,
-            event_color: document.getElementById("new-event_color").value,
-            reminder_time: reminderTime, // 送信するリマインダー時間
+            event_title: document.getElementById("event_title").value,
+            start_date: document.getElementById("start_date").value,
+            end_date: document.getElementById("end_date").value,
+            event_body: document.getElementById("event_body").value,
+            event_color: document.getElementById("event_color").value,
+            // 送信するリマインダー時間
+            reminder_time: document.getElementById("reminder_time")?.value || null,
         })
         .then(response => {
             console.log("✅ 予定が追加されました:", response.data);
@@ -231,6 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => {
             console.error("❌ エラー:", error);
         });
+        console.log("📤 axios.post を実行した直後！");
     });
     
     document.getElementById("update-form")?.addEventListener("submit", function () {

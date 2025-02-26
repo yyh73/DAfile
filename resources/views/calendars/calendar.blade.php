@@ -12,7 +12,7 @@
     <body>
         <!-- 以下のdivタグ内にカレンダーを表示 -->
         <div id='calendar'></div>
-                 <!-- カレンダー新規追加モーダル -->
+                 カレンダー新規追加モーダル
                  <div id="modal-add" class="modal">
 
                 <div class="modal-contents">
@@ -20,35 +20,35 @@
                     @csrf
                     <input id="new-id" type="hidden" name="id" value="" />
                     <label for="event_title">タイトル</label>
-                    <input id="new-event_title" class="input-title" type="text" name="event_title" value="" />
+                    <input id="event_title" class="input-title" type="text" name="event_title" value="" />
 
                     <label for="start_date">開始日時</label>
-                    <input id="new-start_date" class="input-date" type="datetime-local" name="start_date" value="" step="60" />
+                    <input id="start_date" class="input-date" type="datetime-local" name="start_date" value="" step="60" />
 
                     <label for="end_date">終了日時</label>
-                    <input id="new-end_date" class="input-date" type="datetime-local" name="end_date" value="" step="60" /> 
+                    <input id="end_date" class="input-date" type="datetime-local" name="end_date" value="" step="60" /> 
 
                     <label for="event_body" style="display: block">内容</label>
-                    <textarea id="new-event_body" name="event_body" rows="3"></textarea>
+                    <textarea id="event_body" name="event_body" rows="3"></textarea>
                 
-                <div class="event-options">
-                    <label for="event_color">背景色</label>
-                    <select id="new-event_color" name="event_color">
-                        <option value="blue" selected>青</option>
-                        <option value="green">緑</option>
-                        <option value="pink">ピンク</option>
-                        <option value="red">赤</option>
-                        <option value="yellow">黄色</option>
-                        <option value="orange">オレンジ</option>
-                        <option value="purple">紫</option>
-                        <option value="yellowgreen">黄緑</option>
-                        <option value="lightblue">水色</option>
-                        <option value="gray">グレー</option>
-                    </select>
+                    <div class="event-options">
+                        <label for="event_color">背景色</label>
+                        <select id="event_color" name="event_color">
+                            <option value="blue" selected>青</option>
+                            <option value="green">緑</option>
+                            <option value="pink">ピンク</option>
+                            <option value="red">赤</option>
+                            <option value="yellow">黄色</option>
+                            <option value="orange">オレンジ</option>
+                            <option value="purple">紫</option>
+                            <option value="yellowgreen">黄緑</option>
+                            <option value="lightblue">水色</option>
+                            <option value="gray">グレー</option>
+                        </select>
 
-                    <label for="reminder_time">リマインド時間（分前）</label>
-                    <input id="reminder_time" type="number" name="reminder_time" min="1" step="1" value="15">
-                </div>
+                        <label for="reminder_time">リマインド時間（分前）</label>
+                        <input id="reminder_time" type="number" name="reminder_time" min="1" step="1" value="15">
+                    </div>
 
                     <label>
                       <input type="checkbox" name="show_in_month" value="1"> 月に表示する
@@ -61,8 +61,7 @@
                     </label>
                     
                     <button type="button" onclick="closeAddModal()">キャンセル</button>
-                    
-                    <button id="save-event-button" type="button">決定</button>
+                    <button id="save-new-event-button" type="button">決定</button>
                 </form>
             </div>
         </div>
@@ -117,7 +116,7 @@
                 
                     <button type="button" onclick="closeUpdateModal()">キャンセル</button>
 
-                    <button id="save-event-button" type="button">決定</button>
+                    <button id="save-update-event-button" type="button">決定</button>
                 </form>
                 
                 <form id="delete-form" method="post" action="{{ route('delete') }}">

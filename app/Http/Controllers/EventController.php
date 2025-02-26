@@ -16,19 +16,31 @@ class EventController extends Controller
 
     // 新規予定追加
     public function create(Request $request, Event $event){
-        \Log::info('受け取ったリクエストデータ:', $request->all());
+        \Log::info('受け取ったリクエストデータ:', [
+           'event_title' => $request->input('event_title'),
+           'start_date' => $request->input('start_date'),
+           'end_date' => $request->input('end_date'),
+           'event_body' => $request->input('event_body'),
+           'event_color' => $request->input('event_color'),
+           'reminder_time' => $request->input('reminder_time'),
+        ]);
 
         // バリデーション（eventsテーブルの中でNULLを許容していないものをrequired）
-        $request->validate([
+        try{
+            $validatedData = $request->validate([
             'event_title' => 'required',
             'start_date' => 'required|date_format:Y-m-d\TH:i',
             'end_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:start_date',
             'event_color' => 'required',
             'reminder_time' => 'nullable|integer|min:1',
         ]);
-        
-        \Log::info('バリデーション通過');
+        \Log::info('✅ バリデーション成功: ', $validatedData);
 
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('❌ バリデーションエラー: ' . json_encode($e->errors()));
+        return response()->json(['errors' => $e->errors()], 422);
+    }
+       
         try {
             // start_date と end_date のフォーマットを確認
             $startDate = Carbon::createFromFormat('Y-m-d\TH:i', $request->input('start_date'))->format('Y-m-d H:i:s');
@@ -57,6 +69,7 @@ class EventController extends Controller
         $event->end_date = Carbon::createFromFormat('Y-m-d\TH:i', $request->input('end_date'))->addDay()->format('Y-m-d H:i:s'); // FullCalendarが登録する終了日は仕様で1日ずれるので、その修正を行っている
         $event->event_color = $request->input('event_color');
         $event->event_border_color = $request->input('event_color');
+        $event->reminder_time = (int) $request->input('reminder_time');
 
          // フィルタリング用カラムを保存
         $event->show_in_month = $showInMonth;
@@ -85,8 +98,12 @@ class EventController extends Controller
 
        // バリデーション
     $request->validate([
-        'start_date' => 'required|date_format:Y-m-d',
-        'end_date' => 'required|date_format:Y-m-d|after:start_date',
+        'event-title' => 'required|string|max:255',
+        'start_date' => 'required|date_format:Y-m-d\TH:i', // 日付フォーマットを統一
+        'end_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:start_date',
+        'event_body' => 'nullable|string', // `event_body` が NULL でも OK にする
+        'event_color' => 'required|string', // `event_color` の型を指定
+        'reminder_time' => 'nullable|integer|min:1',
     ]);
 
     \Log::info('バリデーション通過');
